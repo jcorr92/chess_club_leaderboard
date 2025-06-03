@@ -33,14 +33,22 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
           git add leaderboard.csv game_list.csv
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
-            echo "Git remote URL:"
+            echo "Git remote URL before change:"
             git remote -v
             echo "PAT is: $PAT"
+
+            git remote set-url origin https://x-access-token:$PAT@github.com/jcorr92/chess_club_leaderboard.git
+
+            echo "Git remote URL after change:"
+            git remote -v
+
             git commit -m "Update Chess leaderboard and game list CSVs"
-            git push
+            git push origin main
           fi
+
