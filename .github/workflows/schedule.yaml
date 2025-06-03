@@ -29,7 +29,7 @@ jobs:
 
       - name: Commit CSVs to repository
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}  # <-- Correct token name used in push
+          PAT: ${{ secrets.PAT }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -39,5 +39,5 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "Update Chess leaderboard and game list CSVs"
-            git push
+            git push https://x-access-token:${PAT}@github.com/jcorr92/chess_club_leaderboard.git
           fi
