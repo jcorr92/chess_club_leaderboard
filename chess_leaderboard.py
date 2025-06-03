@@ -5,21 +5,19 @@ from collections import defaultdict
 from datetime import datetime
 
 # --- Configuration ---
-
-ALL_PLAYERS = ["jcorr92", "xensprinkles", "euratoole", "teamoth"]  # Replace with real usernames
+ALL_PLAYERS = ["jcorr92", "xensprinkles", "euratoole", "teamoth"]
 HEADERS = {
     "User-Agent": "chess-leaderboard-script/1.0 (jcb.corr92@gmail.com)"
 }
 WIN_POINTS = 3
 DRAW_POINTS = 1
+ROLLING_GAME_COUNT = 30
 
 # --- Logging Setup ---
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 # --- API Helpers ---
-
 def fetch_archives(username):
     url = f"https://api.chess.com/pub/player/{username}/games/archives"
     logger.info(f"Fetching archives for {username}")
@@ -37,9 +35,7 @@ def fetch_games(archive_url):
     return response.json().get('games', [])
 
 # --- Game Parsing ---
-
 def parse_daily_games(player, opponents, game_list):
-    results = defaultdict(lambda: {"wins": 0, "losses": 0, "draws": 0})
     archives = fetch_archives(player)
 
     for url in archives:
@@ -68,20 +64,15 @@ def parse_daily_games(player, opponents, game_list):
 
             if player == white:
                 player_result = result_white
-                opponent_result = result_black
             else:
                 player_result = result_black
-                opponent_result = result_white
 
             if player_result == "win":
                 outcome = "win"
-                results[opponent]["wins"] += 1
             elif player_result in {"checkmated", "timeout", "resigned", "lose"}:
                 outcome = "loss"
-                results[opponent]["losses"] += 1
             elif "draw" in player_result or player_result == "stalemate":
                 outcome = "draw"
-                results[opponent]["draws"] += 1
             else:
                 continue
 
@@ -93,34 +84,28 @@ def parse_daily_games(player, opponents, game_list):
                 "url": game.get("url", "")
             })
 
-    return results
-
 # --- Leaderboard Aggregation ---
+def compute_leaderboard(game_list):
+    stats = defaultdict(lambda: {"games": 0, "wins": 0, "draws": 0, "losses": 0})
+    for game in game_list:
+        player = game["player"]
+        outcome = game["outcome"]
+        stats[player]["games"] += 1
+        if outcome == "win":
+            stats[player]["wins"] += 1
+        elif outcome == "draw":
+            stats[player]["draws"] += 1
+        elif outcome == "loss":
+            stats[player]["losses"] += 1
 
-def create_leaderboard(players):
-    total_stats = defaultdict(lambda: {"games": 0, "wins": 0, "losses": 0, "draws": 0})
-    game_list = []
+    for player, s in stats.items():
+        s["points"] = s["wins"] * WIN_POINTS + s["draws"] * DRAW_POINTS
+        s["ppg"] = round(s["points"] / s["games"], 2) if s["games"] else 0.0
 
-    for user in players:
-        logger.info(f"Parsing games for {user}")
-        opponents = [p.lower() for p in players if p != user]
-        results = parse_daily_games(user.lower(), opponents, game_list)
-
-        for opponent, stats in results.items():
-            total_stats[user]["wins"] += stats["wins"]
-            total_stats[user]["losses"] += stats["losses"]
-            total_stats[user]["draws"] += stats["draws"]
-
-    for user, stats in total_stats.items():
-        stats["games"] = stats["wins"] + stats["losses"] + stats["draws"]
-        stats["points"] = stats["wins"] * WIN_POINTS + stats["draws"] * DRAW_POINTS
-
-    return total_stats, game_list
+    return stats
 
 # --- CSV Writers ---
-
 def save_game_list_csv(game_list, filename="game_list.csv"):
-    # Sort games by end_time
     sorted_games = sorted(game_list, key=lambda x: x["end_time"])
     with open(filename, "w", newline="") as f:
         writer = csv.writer(f)
@@ -130,32 +115,42 @@ def save_game_list_csv(game_list, filename="game_list.csv"):
             writer.writerow([date, game["player"], game["opponent"], game["outcome"], game["url"]])
     logger.info(f"Saved game list to {filename}")
 
-def save_leaderboard_csv(leaderboard, filename="leaderboard.csv"):
+def write_leaderboard_section(writer, title, stats):
+    writer.writerow([title])
+    writer.writerow(["Player", "Games", "Wins", "Draws", "Losses", "Points"])
+    for player, s in sorted(stats.items(), key=lambda x: x[1]['points'], reverse=True):
+        writer.writerow([player, s["games"], s["wins"], s["draws"], s["losses"], s["points"]])
+    writer.writerow([])
+    writer.writerow(["Weighted Leaderboard (Points per Game)"])
+    writer.writerow(["Player", "Games", "Points", "Points/Game"])
+    for player, s in sorted(stats.items(), key=lambda x: x[1]['ppg'], reverse=True):
+        writer.writerow([player, s["games"], s["points"], s["ppg"]])
+    writer.writerow([])
+
+def save_leaderboard_csv(full_game_list, filename="leaderboard.csv"):
+    full_sorted = sorted(full_game_list, key=lambda x: x["end_time"])
+    rolling = full_sorted[-ROLLING_GAME_COUNT:]
+
+    total_stats = compute_leaderboard(full_sorted)
+    rolling_stats = compute_leaderboard(rolling)
+
     with open(filename, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["Player", "Games", "Wins", "Draws", "Losses", "Points"])
-        for player, stats in sorted(leaderboard.items(), key=lambda x: x[1]['points'], reverse=True):
-            writer.writerow([
-                player,
-                stats["games"],
-                stats["wins"],
-                stats["draws"],
-                stats["losses"],
-                stats["points"]
-            ])
-        writer.writerow([])
+        write_leaderboard_section(writer, f"Rolling Leaderboard (Last {ROLLING_GAME_COUNT} Games)", rolling_stats)
+        write_leaderboard_section(writer, "Total Leaderboard", total_stats)
         writer.writerow(["Legend"])
         writer.writerow([f"Win = {WIN_POINTS} points", f"Draw = {DRAW_POINTS} points"])
-
     logger.info(f"Saved leaderboard to {filename}")
 
 # --- Main ---
-
 def main():
-    leaderboard, game_list = create_leaderboard(ALL_PLAYERS)
-    save_game_list_csv(game_list)
-    save_leaderboard_csv(leaderboard)
+    all_game_list = []
+    for user in ALL_PLAYERS:
+        logger.info(f"Processing games for {user}")
+        parse_daily_games(user.lower(), [p.lower() for p in ALL_PLAYERS if p != user.lower()], all_game_list)
+
+    save_game_list_csv(all_game_list)
+    save_leaderboard_csv(all_game_list)
 
 if __name__ == "__main__":
     main()
-
