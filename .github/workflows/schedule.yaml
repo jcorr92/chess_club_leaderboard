@@ -30,11 +30,19 @@ jobs:
 
       - name: Commit CSVs to repository
         env:
+<<<<<<< HEAD
           GITHUB_TOKEN: ${{ secrets.PAT }}
+=======
+          PAT: ${{ secrets.PAT }}
+>>>>>>> 52d5923 (Adding 30 game rolling leaderboard)
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add leaderboard.csv game_list.csv
+
+          # Set remote using token
+          git remote set-url origin https://x-access-token:${PAT}@github.com/jcorr92/chess_club_leaderboard.git
+
+          git add leaderboard.csv game_list.csv leaderboard_legend.txt
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
