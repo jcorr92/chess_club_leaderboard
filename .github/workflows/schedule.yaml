@@ -29,7 +29,7 @@ jobs:
 
       - name: Commit CSVs to repository
         env:
-          PAT: ${{ secrets.PAT }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -39,16 +39,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
-            echo "Git remote URL before change:"
-            git remote -v
-            echo "PAT is: $PAT"
-
-            git remote set-url origin https://x-access-token:$PAT@github.com/jcorr92/chess_club_leaderboard.git
-
-            echo "Git remote URL after change:"
-            git remote -v
-
             git commit -m "Update Chess leaderboard and game list CSVs"
-            git push origin main
+            git push
           fi
 
