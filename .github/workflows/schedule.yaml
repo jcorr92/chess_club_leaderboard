@@ -39,8 +39,8 @@ jobs:
             echo "No changes to commit."
           else
             echo "Git remote URL:"
+            git remote -v
             echo "PAT is: $PAT"
             git commit -m "Update Chess leaderboard and game list CSVs"\
-            git remote -v
             git push
           fi
