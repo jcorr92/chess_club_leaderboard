@@ -41,6 +41,6 @@ jobs:
             echo "Git remote URL:"
             git remote -v
             echo "PAT is: $PAT"
-            git commit -m "Update Chess leaderboard and game list CSVs"\
+            git commit -m "Update Chess leaderboard and game list CSVs"
             git push
           fi
