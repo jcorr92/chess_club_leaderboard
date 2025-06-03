@@ -116,28 +116,34 @@ def save_game_list_csv(game_list, filename="game_list.csv"):
     logger.info(f"Saved game list to {filename}")
 
 def write_leaderboard_section(writer, title, stats):
-    writer.writerow([title] + [""] * 5)
+    writer.writerow([f"# {title}"] + [""] * 5)
     writer.writerow(["Player", "Games", "Wins", "Draws", "Losses", "Points"])
     for player, s in sorted(stats.items(), key=lambda x: x[1]['points'], reverse=True):
         writer.writerow([player, s["games"], s["wins"], s["draws"], s["losses"], s["points"]])
     writer.writerow([])
-    #
-    # writer.writerow(["Weighted Leaderboard (Points per Game)"])
-    # writer.writerow(["Player", "Games", "Points", "Points/Game"])
-    # for player, s in sorted(stats.items(), key=lambda x: x[1]['ppg'], reverse=True):
-    #     writer.writerow([player, s["games"], s["points"], s["ppg"]])
-    # writer.writerow([])
+    
 
 def save_leaderboard_csv(full_game_list, filename="leaderboard.csv"):
+    # Sort all games by time (just for consistency)
     full_sorted = sorted(full_game_list, key=lambda x: x["end_time"])
-    rolling = full_sorted[-ROLLING_GAME_COUNT:]
 
+    # --- Create per-player rolling game lists ---
+    games_by_player = defaultdict(list)
+    for game in full_sorted:
+        games_by_player[game["player"]].append(game)
+
+    rolling_games = []
+    for player, games in games_by_player.items():
+        recent_games = sorted(games, key=lambda x: x["end_time"])[-ROLLING_GAME_COUNT:]
+        rolling_games.extend(recent_games)
+
+    # Compute stats
     total_stats = compute_leaderboard(full_sorted)
-    rolling_stats = compute_leaderboard(rolling)
+    rolling_stats = compute_leaderboard(rolling_games)
 
     with open(filename, "w", newline="") as f:
         writer = csv.writer(f)
-        write_leaderboard_section(writer, f"Rolling Leaderboard (Last {ROLLING_GAME_COUNT} Games)", rolling_stats)
+        write_leaderboard_section(writer, f"Rolling Leaderboard (Last {ROLLING_GAME_COUNT} Games per Player)", rolling_stats)
         write_leaderboard_section(writer, "Total Leaderboard", total_stats)
     logger.info(f"Saved leaderboard to {filename}")
 
