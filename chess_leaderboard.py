@@ -116,7 +116,7 @@ def save_game_list_csv(game_list, filename="game_list.csv"):
     logger.info(f"Saved game list to {filename}")
 
 def write_leaderboard_section(writer, title, stats):
-    writer.writerow(f"# {title}")
+    writer.writerow([title] + [""] * 5)
     writer.writerow(["Player", "Games", "Wins", "Draws", "Losses", "Points"])
     for player, s in sorted(stats.items(), key=lambda x: x[1]['points'], reverse=True):
         writer.writerow([player, s["games"], s["wins"], s["draws"], s["losses"], s["points"]])
