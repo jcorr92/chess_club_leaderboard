@@ -40,8 +40,7 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "Update Chess leaderboard and game list CSVs"
-            git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/jcorr92/chess_club_leaderboard.git
-            git push origin main
+            git push
           fi
 
 
