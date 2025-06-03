@@ -121,11 +121,12 @@ def write_leaderboard_section(writer, title, stats):
     for player, s in sorted(stats.items(), key=lambda x: x[1]['points'], reverse=True):
         writer.writerow([player, s["games"], s["wins"], s["draws"], s["losses"], s["points"]])
     writer.writerow([])
-    writer.writerow(["Weighted Leaderboard (Points per Game)"])
-    writer.writerow(["Player", "Games", "Points", "Points/Game"])
-    for player, s in sorted(stats.items(), key=lambda x: x[1]['ppg'], reverse=True):
-        writer.writerow([player, s["games"], s["points"], s["ppg"]])
-    writer.writerow([])
+    #
+    # writer.writerow(["Weighted Leaderboard (Points per Game)"])
+    # writer.writerow(["Player", "Games", "Points", "Points/Game"])
+    # for player, s in sorted(stats.items(), key=lambda x: x[1]['ppg'], reverse=True):
+    #     writer.writerow([player, s["games"], s["points"], s["ppg"]])
+    # writer.writerow([])
 
 def save_leaderboard_csv(full_game_list, filename="leaderboard.csv"):
     full_sorted = sorted(full_game_list, key=lambda x: x["end_time"])
@@ -138,8 +139,6 @@ def save_leaderboard_csv(full_game_list, filename="leaderboard.csv"):
         writer = csv.writer(f)
         write_leaderboard_section(writer, f"Rolling Leaderboard (Last {ROLLING_GAME_COUNT} Games)", rolling_stats)
         write_leaderboard_section(writer, "Total Leaderboard", total_stats)
-        writer.writerow(["Legend"])
-        writer.writerow([f"Win = {WIN_POINTS} points", f"Draw = {DRAW_POINTS} points"])
     logger.info(f"Saved leaderboard to {filename}")
 
 # --- Main ---
