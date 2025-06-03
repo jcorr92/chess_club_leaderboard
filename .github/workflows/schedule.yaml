@@ -30,11 +30,7 @@ jobs:
 
       - name: Commit CSVs to repository
         env:
-<<<<<<< HEAD
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-=======
           PAT: ${{ secrets.PAT }}
->>>>>>> 52d5923 (Adding 30 game rolling leaderboard)
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
