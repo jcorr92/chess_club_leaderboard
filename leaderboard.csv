@@ -5,13 +5,6 @@ jcorr92,6,4,0,2,12
 xensprinkles,12,3,0,9,9
 teamoth,4,3,0,1,9
 
-Weighted Leaderboard (Points per Game)
-Player,Games,Points,Points/Game
-teamoth,4,9,2.25
-jcorr92,6,12,2.0
-euratoole,8,15,1.88
-xensprinkles,12,9,0.75
-
 Total Leaderboard
 Player,Games,Wins,Draws,Losses,Points
 euratoole,78,48,1,29,145
@@ -19,12 +12,3 @@ xensprinkles,79,26,1,52,79
 jcorr92,11,8,0,3,24
 teamoth,4,3,0,1,9
 
-Weighted Leaderboard (Points per Game)
-Player,Games,Points,Points/Game
-teamoth,4,9,2.25
-jcorr92,11,24,2.18
-euratoole,78,145,1.86
-xensprinkles,79,79,1.0
-
-Legend
-Win = 3 points,Draw = 1 points
