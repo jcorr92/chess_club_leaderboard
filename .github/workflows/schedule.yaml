@@ -38,7 +38,7 @@ jobs:
           # Set remote using token
           git remote set-url origin https://x-access-token:${PAT}@github.com/jcorr92/chess_club_leaderboard.git
 
-          git add leaderboard.csv game_list.csv leaderboard_legend.txt
+          git add leaderboard.csv game_list.csv
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
