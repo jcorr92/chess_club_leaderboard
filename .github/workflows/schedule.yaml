@@ -29,7 +29,7 @@ jobs:
 
       - name: Commit CSVs to repository
         env:
-          GITHUB_TOKEN: ${{ secrets.ccPAT }}
+          GITHUB_TOKEN: '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'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
