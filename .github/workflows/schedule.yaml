@@ -29,17 +29,19 @@ jobs:
 
       - name: Commit CSVs to repository
         env:
-          GITHUB_TOKEN: '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'
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
+      
           git add leaderboard.csv game_list.csv
-
+      
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
             git commit -m "Update Chess leaderboard and game list CSVs"
-            git push
+            git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/jcorr92/chess_club_leaderboard.git
+            git push origin main
           fi
+
 
