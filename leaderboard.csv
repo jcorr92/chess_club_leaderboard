@@ -1,14 +1,14 @@
 # Rolling Leaderboard (Last 30 Games per Player),,,,,
 Player,Games,Wins,Draws,Losses,Points
-euratoole,30,15,0,15,45
+euratoole,30,14,0,16,42
+jcorr92,15,12,0,3,36
 xensprinkles,30,11,0,19,33
-jcorr92,14,11,0,3,33
 teamoth,8,4,0,4,12
 
 # Total Leaderboard,,,,,
 Player,Games,Wins,Draws,Losses,Points
-euratoole,82,51,1,30,154
+euratoole,83,51,1,31,154
 xensprinkles,82,26,1,55,79
-jcorr92,14,11,0,3,33
+jcorr92,15,12,0,3,36
 teamoth,8,4,0,4,12
 
